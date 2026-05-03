@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Libro del Espacio PRO FINAL</title>
+
+<style>
+body{
+margin:0;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:white;
+font-family:Arial;
+}
+
+/* LIBRO */
+.book{
+position:relative;
+width:320px;
+height:480px;
+perspective:2000px;
+}
+
+/* PAGINAS */
+.page{
+position:absolute;
+width:100%;
+height:100%;
+transform-origin:left;
+transition:transform 1s ease;
+transform-style:preserve-3d;
+border-radius:10px;
+box-shadow:0 10px 25px rgba(0,0,0,0.8);
+}
+
+.page.flipped{
+transform:rotateY(-180deg);
+}
+
+.face{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+background:linear-gradient(135deg,#000,#111);
+padding:15px;
+box-sizing:border-box;
+border-radius:10px;
+}
+
+.back{
+transform:rotateY(180deg);
+}
+
+img{
+width:100%;
+height:170px;
+object-fit:cover;
+border-radius:8px;
+}
+
+p{
+font-size:14px;
+line-height:1.4;
+}
+
+/* BOTONES */
+.controls{
+position:absolute;
+bottom:10px;
+width:100%;
+display:flex;
+justify-content:space-between;
+padding:0 20px;
+}
+
+.btn{
+width:45px;
+height:45px;
+border-radius:50%;
+background:rgba(255,255,255,0.2);
+border:none;
+color:white;
+font-size:18px;
+cursor:pointer;
+}
+
+/* START */
+#start{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:black;
+}
+</style>
+
+</head>
+<body>
+
+<div id="start">
+<h1>📖 Libro del Espacio</h1>
+<button onclick="start()">🚀 Iniciar</button>
+</div>
+
+<div class="book" id="book" style="display:none;"></div>
+
+<div class="controls" id="controls" style="display:none;">
+<button class="btn" onclick="prev()">◀</button>
+<button class="btn" onclick="next()">▶</button>
+</div>
+
+<audio id="music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+<audio id="flip" src="https://www.soundjay.com/misc/sounds/page-turn-1.mp3"></audio>
+
+<script>
+const data=[
+{
+t:"🌌 Introducción",
+img:"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa",
+txt:"El universo es un lugar inmenso que contiene miles de millones de galaxias. Cada galaxia tiene estrellas, planetas, polvo cósmico y energía. Nuestro sistema solar es solo una pequeña parte de este vasto espacio. A lo largo de la historia, los humanos han intentado entender su origen y funcionamiento."
+},
+{
+t:"☀️ Mercurio",
+img:"https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg",
+txt:"Mercurio es el planeta más cercano al Sol y uno de los más pequeños. No tiene una atmósfera significativa, por lo que las temperaturas cambian drásticamente entre el día y la noche. Su superficie está llena de cráteres debido a impactos de meteoritos."
+},
+{
+t:"🔥 Venus",
+img:"https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg",
+txt:"Venus es conocido como el planeta más caliente del sistema solar. Su atmósfera está compuesta principalmente de dióxido de carbono, lo que provoca un efecto invernadero extremo. Su superficie es volcánica y está cubierta por densas nubes."
+},
+{
+t:"🌍 Tierra",
+img:"https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg",
+txt:"La Tierra es el único planeta conocido que alberga vida. Posee agua en estado líquido, una atmósfera rica en oxígeno y una temperatura adecuada para los seres vivos. Está formada por continentes y océanos que cubren la mayor parte de su superficie."
+},
+{
+t:"🔴 Marte",
+img:"https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg",
+txt:"Marte es conocido como el planeta rojo debido al óxido de hierro en su superficie. Tiene el volcán más grande del sistema solar, llamado Monte Olimpo. Existen evidencias de que en el pasado pudo haber tenido agua líquida."
+},
+{
+t:"🪐 Júpiter",
+img:"https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg",
+txt:"Júpiter es el planeta más grande del sistema solar. Está compuesto principalmente de gas y tiene una gran tormenta llamada la Gran Mancha Roja. Posee muchas lunas, algunas de ellas con posibles océanos bajo su superficie."
+},
+{
+t:"💍 Saturno",
+img:"https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg",
+txt:"Saturno es famoso por sus impresionantes anillos formados por hielo y rocas. Es un gigante gaseoso y uno de los planetas más ligeros. Tiene muchas lunas, como Titán, que posee una atmósfera densa."
+},
+{
+t:"🌊 Urano",
+img:"https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg",
+txt:"Urano es un gigante helado que gira inclinado sobre su eje. Su color azul verdoso se debe a la presencia de metano en su atmósfera. Tiene temperaturas extremadamente bajas."
+},
+{
+t:"❄️ Neptuno",
+img:"https://upload.wikimedia.org/wikipedia/commons/5/56/Neptune_Full.jpg",
+txt:"Neptuno es el planeta más lejano del sistema solar. Tiene los vientos más rápidos y una atmósfera muy fría. Es de color azul intenso debido a su composición química."
+},
+{
+t:"💥 El Big Bang",
+img:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564",
+txt:"El Big Bang es la teoría que explica el origen del universo. Se cree que todo comenzó hace aproximadamente 13.8 mil millones de años a partir de una gran explosión. Desde entonces, el universo ha estado en constante expansión, formando galaxias, estrellas y planetas. Todo lo que existe hoy proviene de ese momento inicial."
+}
+];
+
+const book=document.getElementById("book");
+let pages=[];
+let index=0;
+
+/* CREAR PAGINAS */
+data.forEach((d,i)=>{
+let page=document.createElement("div");
+page.className="page";
+page.style.zIndex=data.length-i;
+
+page.innerHTML=`
+<div class="face">
+<h2>${d.t}</h2>
+<img src="${d.img}">
+<p>${d.txt}</p>
+</div>
+<div class="face back"></div>
+`;
+
+book.appendChild(page);
+pages.push(page);
+});
+
+/* VOZ PRO */
+function speak(text){
+speechSynthesis.cancel();
+const s=new SpeechSynthesisUtterance(text);
+s.lang="es-ES";
+s.volume=1;
+s.rate=0.9;
+speechSynthesis.speak(s);
+}
+
+/* START */
+function start(){
+document.getElementById("start").style.display="none";
+book.style.display="block";
+document.getElementById("controls").style.display="flex";
+
+const m=document.getElementById("music");
+m.volume=0.2;
+m.play();
+
+setTimeout(()=>speak(data[0].txt),500);
+}
+
+/* NEXT */
+function next(){
+if(index<pages.length){
+pages[index].classList.add("flipped");
+document.getElementById("flip").play();
+
+index++;
+
+if(data[index]){
+setTimeout(()=>speak(data[index].txt),400);
+}
+}
+}
+
+/* PREV */
+function prev(){
+if(index>0){
+index--;
+
+pages[index].classList.remove("flipped");
+document.getElementById("flip").play();
+
+setTimeout(()=>speak(data[index].txt),400);
+}
+}
+</script>
+
+</body>
+</html>
